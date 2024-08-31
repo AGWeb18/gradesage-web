@@ -90,7 +90,11 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error processing file:', error);
-    return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 });
+    if (error instanceof Error) {
+      return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 });
+    } else {
+      return NextResponse.json({ error: 'Internal server error', details: 'Unknown error occurred' }, { status: 500 });
+    }
   }
 }
 

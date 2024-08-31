@@ -48,7 +48,7 @@ export default function PricingSection({
   showCurrentPlan = false,
 }: PricingSectionProps) {
   const { data: session } = useSession();
-  const userPlan = session?.user?.subscriptionType || "Free";
+  const userPlan = (session?.user as any)?.subscriptionType || "Free";
 
   return (
     <section className="py-12 sm:py-20 bg-gray-50 dark:bg-gray-800">

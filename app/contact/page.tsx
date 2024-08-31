@@ -17,8 +17,8 @@ export default function ContactPage() {
               Get in Touch
             </h2>
             <p className="mb-4 text-gray-600 dark:text-gray-300">
-              We'd love to hear from you. Please fill out the form below or use
-              our contact information to reach out.
+              We&apos;d love to hear from you. Please fill out the form below or
+              use our contact information to reach out.
             </p>
             <div className="mb-4">
               <h3 className="text-lg font-semibold mb-2 text-text-light dark:text-text-dark">

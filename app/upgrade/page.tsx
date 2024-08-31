@@ -39,8 +39,8 @@ export default function UpgradePage() {
               Need to make changes?
             </h2>
             <p className="mb-4 text-gray-600 dark:text-gray-300">
-              While we'd love to keep you on your current plan, we understand
-              that needs change. Here are your options:
+              While we&apos;d love to keep you on your current plan, we
+              understand that needs change. Here are your options:
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link

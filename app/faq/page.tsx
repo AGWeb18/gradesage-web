@@ -3,60 +3,65 @@
 import React from "react";
 import Header from "../components/Header";
 import { useTheme } from "next-themes";
+import Footer from "../components/Footer";
 
 const FAQPage: React.FC = () => {
   const { theme } = useTheme();
   const faqs = [
     {
-      question: "How does this service help reduce teaching fatigue?",
+      question: "How does this service help enhance the grading process?",
       answer:
-        "Our AI-powered grading system automates the time-consuming process of evaluating written responses, allowing teachers to focus on more impactful tasks like lesson planning and one-on-one student interactions. This significantly reduces the mental and emotional strain associated with grading large volumes of assignments.",
-    },
-    {
-      question: "How does your system address potential bias in grading?",
-      answer:
-        "Our AI model is designed to evaluate responses based solely on their content and quality, without being influenced by factors like student names or writing styles. This helps to minimize unconscious biases that human graders might unintentionally introduce. Additionally, our system provides consistent grading criteria across all submissions, ensuring fairness in evaluation.",
-    },
-    {
-      question: "Is my students' data safe and private?",
-      answer:
-        "We take data privacy and security very seriously. We do not store any student data or submitted content. The only information we retain is the user's email address for account purposes. All processing is done in real-time, and no assignment data is kept after the grading process is complete.",
-    },
-    {
-      question: "How accurate is the AI grading compared to human grading?",
-      answer:
-        "Our AI grading system uses state-of-the-art language models to provide high-quality evaluations. While AI technology continues to evolve rapidly, we always recommend that teachers review the AI-generated grades and feedback, especially for high-stakes assessments. The system is designed to assist educators, not replace their expertise.",
-    },
-    {
-      question: "Can this system handle different subjects and grade levels?",
-      answer:
-        "Yes, our AI model is versatile and can be applied to a wide range of subjects and grade levels, from middle school to higher education. It's particularly effective in grading open-ended questions in subjects like literature, history, social sciences, and even some areas of STEM where written explanations are required.",
-    },
-    {
-      question: "How does this service improve the feedback students receive?",
-      answer:
-        "Our AI provides detailed, constructive feedback for each response, highlighting strengths and areas for improvement. This level of consistent, in-depth feedback would be extremely time-consuming for teachers to produce manually for every student. The quick turnaround also allows students to receive feedback while the assignment is still fresh in their minds, enhancing the learning process.",
-    },
-    {
-      question: "What if I disagree with the AI's grading or feedback?",
-      answer:
-        "Teachers always have the final say. Our system is designed to be a tool that assists educators, not replace them. You can easily review and adjust any grades or feedback before finalizing them. This process often takes far less time than grading from scratch and still allows for your professional judgment and insight.",
-    },
-    {
-      question: "How does your service handle plagiarism detection?",
-      answer:
-        "While our primary focus is on grading and providing feedback, our system can flag responses that show unusual similarities to other submissions within the same class. However, for comprehensive plagiarism checking, we recommend using specialized plagiarism detection tools in conjunction with our service.",
-    },
-    {
-      question: "Is there a limit to how many submissions I can process?",
-      answer:
-        "The number of submissions you can process depends on your subscription plan. Our Basic plan allows for 500 requests per month, while our Pro plan increases this to 1000. For institutions with higher volume needs, we offer an Enterprise plan with unlimited requests. You can always upgrade your plan if you need to process more submissions.",
+        "Our AI-powered screening tool assists teachers by providing an initial assessment of written responses. This allows educators to focus their expertise on refining grades, providing personalized feedback, and addressing complex aspects of student work. The tool is designed to streamline the grading process, not replace teacher judgment.",
     },
     {
       question:
-        "How does this service integrate with existing Learning Management Systems (LMS)?",
+        "How does your system maintain fairness in the screening process?",
       answer:
-        "We're currently working on integrations with popular LMS platforms. In the meantime, you can easily export our grading results and feedback in CSV format, which can be imported into most LMS gradebooks. We're always open to feedback on which integrations would be most valuable to our users.",
+        "Our AI model is designed to provide consistent initial assessments based solely on content and quality. This helps minimize potential biases and ensures a uniform baseline for all submissions. However, teachers always have the final say and can adjust grades based on their professional judgment and knowledge of individual student contexts.",
+    },
+    {
+      question:
+        "Is my students' data safe and private when using this screening tool?",
+      answer:
+        "We prioritize data privacy and security. We do not store any student data or submitted content beyond the immediate screening process. The only information we retain is the user's email address for account purposes. All processing is done in real-time, ensuring that sensitive information is not kept after the initial assessment is complete.",
+    },
+    {
+      question: "How accurate is the AI screening compared to human grading?",
+      answer:
+        "Our AI screening tool uses advanced language models to provide initial assessments. While it's highly effective for preliminary evaluation, it's designed to support, not replace, educator expertise. We always recommend that teachers review and refine the AI-generated assessments, especially for high-stakes assignments. The tool's purpose is to give teachers a head start, allowing them to allocate more time to nuanced aspects of grading.",
+    },
+    {
+      question:
+        "Can this screening tool handle different subjects and grade levels?",
+      answer:
+        "Yes, our AI model is versatile and can provide initial assessments for a wide range of subjects and grade levels, from middle school to higher education. It's particularly useful for screening open-ended questions in subjects like literature, history, social sciences, and even some areas of STEM where written explanations are required. However, teacher expertise remains crucial for final grading decisions.",
+    },
+    {
+      question:
+        "How does this service improve the feedback process for students?",
+      answer:
+        "Our AI provides preliminary feedback for each response, highlighting potential strengths and areas for improvement. This gives teachers a starting point to craft more detailed, personalized feedback. The quick initial screening allows educators to spend more time refining feedback and addressing individual student needs, enhancing the overall learning process.",
+    },
+    {
+      question: "What if I disagree with the AI's initial assessment?",
+      answer:
+        "Teachers always have complete control over the final grades and feedback. Our system is designed as a supportive tool that provides an initial screening, not a replacement for professional judgment. You can easily adjust any assessments or feedback before finalizing them. This process often saves time compared to starting from scratch while still allowing for your expertise and insight to shape the final evaluation.",
+    },
+    {
+      question: "How does your service handle potential plagiarism?",
+      answer:
+        "While our primary focus is on providing initial grade assessments and feedback, our system can flag responses that show unusual similarities to other submissions within the same class. This feature is meant to assist teachers in identifying potential areas for further review. However, for comprehensive plagiarism checking, we recommend using specialized plagiarism detection tools in conjunction with our service.",
+    },
+    {
+      question: "Is there a limit to how many submissions I can screen?",
+      answer:
+        "The number of submissions you can screen depends on your subscription plan. Our Free plan allows for 10 screenings per month, the Basic plan allows for 300, while our Premium plan increases this to 1000. For institutions with higher volume needs, we offer a VIP plan with unlimited screenings. You can always upgrade your plan if you need to process more submissions.",
+    },
+    {
+      question:
+        "How does this screening tool integrate with existing Learning Management Systems (LMS)?",
+      answer:
+        "We're currently developing integrations with popular LMS platforms. In the meantime, you can easily export our screening results and initial feedback in CSV format, which can be imported into most LMS gradebooks. This allows you to use our tool alongside your existing systems, enhancing your grading workflow without disrupting it. We're always open to feedback on which integrations would be most valuable to our users.",
     },
   ];
 
@@ -101,6 +106,7 @@ const FAQPage: React.FC = () => {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

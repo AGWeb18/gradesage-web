@@ -16,26 +16,51 @@ export async function GET(req: NextRequest) {
     const userId = session.user.email;
     console.log('Fetching data for user:', userId);
     const key = `user:${userId}:anthropic_requests`;
+    const subscriptionStartKey = `user:${userId}:subscription_start`;
 
-    const [subscriptionType, requestCount] = await Promise.all([
+    const [subscriptionType, requestCount, subscriptionStart] = await Promise.all([
       redis.get(`user:${userId}:subscription`),
       redis.get(key),
+      redis.get(subscriptionStartKey),
     ]);
 
-    console.log('Redis data:', { subscriptionType, requestCount });
+    let parsedRequestCount = parseInt(requestCount ?? '0');
+    let daysLeft = 30;
 
-    let limit = 500; // Default to Basic plan
-    if (subscriptionType === 'Pro') limit = 1000;
-    if (subscriptionType === 'Enterprise') limit = Infinity;
+    // Check if we need to reset the count
+    if (subscriptionStart) {
+      const daysSinceSubscriptionStart = Math.floor((Date.now() - parseInt(subscriptionStart)) / (1000 * 60 * 60 * 24));
+      daysLeft = Math.max(0, 30 - daysSinceSubscriptionStart);
+      if (daysSinceSubscriptionStart >= 30) {
+        // Reset the count and update the subscription start date
+        await redis.set(key, '0');
+        await redis.set(subscriptionStartKey, Date.now().toString());
+        parsedRequestCount = 0;
+        daysLeft = 30;
+        console.log(`Reset Anthropic request count for user ${userId}`);
+      }
+    } else {
+      // If no start date is set, set it to now
+      await redis.set(subscriptionStartKey, Date.now().toString());
+    }
 
-    const parsedRequestCount = parseInt(requestCount ?? '0');
+    console.log('Redis data:', { subscriptionType, requestCount: parsedRequestCount });
+
+    let limit = 10; // Default to Free plan
+    if (subscriptionType === 'Basic') limit = 300;
+    if (subscriptionType === 'Premium') limit = 1000;
+    if (subscriptionType === 'VIP') limit = Infinity;
+
     const remainingRequests = Math.max(0, limit - parsedRequestCount);
 
     const responseData = {
-      subscriptionType: subscriptionType || 'Basic',
+      subscriptionType: subscriptionType || 'Free',
       requestCount: parsedRequestCount,
       remainingRequests,
       limit,
+      daysLeft,
+      upgradeInfo: subscriptionType === 'Free' ? 'Upgrade to Basic for 300 requests/month' :
+                   subscriptionType === 'Basic' ? 'Upgrade to Premium for 1000 requests/month' : null
     };
 
     console.log('Sending user data:', responseData);

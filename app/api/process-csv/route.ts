@@ -48,9 +48,10 @@ export async function POST(req: NextRequest) {
 
     console.log(`User ${userId} request count updated:`, requestCount);
 
-    let limit = 500; // Default to Basic plan
-    if (subscriptionType === 'Pro') limit = 1000;
-    if (subscriptionType === 'Enterprise') limit = Infinity;
+    let limit = 10; // Default to Free plan
+    if (subscriptionType === 'Basic') limit = 300;
+    if (subscriptionType === 'Premium') limit = 1000;
+    if (subscriptionType === 'VIP') limit = Infinity;
 
     if (requestCount > limit) {
       console.log(`Rate limit exceeded for user ${userId}`);
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error processing file:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 });
   }
 }
 
@@ -135,10 +136,33 @@ async function processCSV(file: File, formData: FormData, userId: string): Promi
 
 async function updateUserRequestCount(userId: string, increment: number) {
   const key = `user:${userId}:anthropic_requests`;
-  const newCount = await redis.incrby(key, increment);
+  const subscriptionStartKey = `user:${userId}:subscription_start`;
+
+  // Get the subscription start date
+  let subscriptionStart = await redis.get(subscriptionStartKey);
+
+  if (!subscriptionStart) {
+    // If no start date is set, set it to now
+    subscriptionStart = Date.now().toString();
+    await redis.set(subscriptionStartKey, subscriptionStart);
+  }
+
+  const daysSinceSubscriptionStart = Math.floor((Date.now() - parseInt(subscriptionStart)) / (1000 * 60 * 60 * 24));
+
+  if (daysSinceSubscriptionStart >= 30) {
+    // Reset the count and update the subscription start date
+    await redis.set(key, increment.toString());
+    await redis.set(subscriptionStartKey, Date.now().toString());
+    console.log(`Reset Anthropic request count for user ${userId}`);
+  } else {
+    // Increment the existing count
+    await redis.incrby(key, increment);
+  }
+
+  const newCount = await redis.get(key);
   console.log(`Updated Anthropic request count for user ${userId}: ${newCount}`);
   
-  // Set expiry for the key if it's a new key (30 days)
+  // Set expiry for the key (30 days)
   await redis.expire(key, 30 * 24 * 60 * 60);
 }
 

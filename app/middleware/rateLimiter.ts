@@ -3,12 +3,11 @@ import { redis } from '../../lib/redis';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../api/auth/[...nextauth]/auth-options';
 
-const RATE_LIMIT_DURATION = 30 * 24 * 60 * 60; // 30 days in seconds
-
 const RATE_LIMITS = {
-  Basic: 500,
-  Pro: 1000,
-  Enterprise: Infinity
+  Free: 10,
+  Basic: 300,
+  Premium: 1000,
+  VIP: Infinity
 };
 
 export async function rateLimiter(req: NextRequest) {

@@ -6,6 +6,12 @@ import PricingSection from "./components/PricingComponent";
 import Features from "./components/Features";
 import HeroComponent from "./components/HeroComponent";
 
+const currentPromotion = {
+  active: true,
+  message: "Back to School Sale: 20% off all plans! Use code BACK2SCHOOL",
+  endDate: "2023-09-30",
+};
+
 export default function Home() {
   const examples = [
     {
@@ -39,6 +45,18 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">
+      {currentPromotion.active && (
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 text-center">
+          <div className="container mx-auto flex items-center justify-center">
+            <span className="mr-2">🎉</span>
+            <p className="font-semibold">{currentPromotion.message}</p>
+            <span className="ml-2 text-sm">
+              Ends {currentPromotion.endDate}
+            </span>
+          </div>
+        </div>
+      )}
+
       <Header />
 
       <main className="flex-grow container mx-auto px-4 py-8 animate-fade-in">
@@ -58,6 +76,8 @@ export default function Home() {
         <Features />
         <PricingSection />
       </main>
+
+      {/* <PartnersSection /> */}
 
       <Footer />
     </div>

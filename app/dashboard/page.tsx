@@ -55,8 +55,10 @@ export default function Dashboard() {
   const [remainingRequests, setRemainingRequests] = useState<number | null>(
     null
   );
-  const [requestLimit, setRequestLimit] = useState<number>(500);
+  const [requestLimit, setRequestLimit] = useState<number>(300);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
+  const [upgradeInfo, setUpgradeInfo] = useState<string | null>(null);
 
   const fetchUserData = async () => {
     try {
@@ -70,6 +72,8 @@ export default function Dashboard() {
       setRequestCount(data.requestCount);
       setRemainingRequests(data.remainingRequests);
       setRequestLimit(data.limit);
+      setDaysLeft(data.daysLeft);
+      setUpgradeInfo(data.upgradeInfo);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -185,6 +189,38 @@ export default function Dashboard() {
                 Request limit:{" "}
                 {requestLimit === Infinity ? "Unlimited" : requestLimit}
               </p>
+              <p className="text-gray-800 dark:text-gray-300">
+                Days left in current cycle: {daysLeft}
+              </p>
+              {upgradeInfo && (
+                <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-md">
+                  <p className="font-semibold">Upgrade your plan!</p>
+                  <p>{upgradeInfo}</p>
+                  <button className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    Upgrade Now
+                  </button>
+                </div>
+              )}
+              {remainingRequests !== null &&
+                remainingRequests <= 10 &&
+                requestLimit !== Infinity && (
+                  <div className="mt-4 p-3 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 rounded-md flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">
+                        Warning: You are approaching your request limit!
+                      </p>
+                      <p>
+                        Consider upgrading your plan to avoid interruptions.
+                      </p>
+                    </div>
+                    <Link
+                      href="/upgrade"
+                      className="ml-4 bg-blue-500 hover:bg-blue-600 dark:bg-blue-400 dark:hover:bg-blue-500 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out"
+                    >
+                      Upgrade Now
+                    </Link>
+                  </div>
+                )}
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
@@ -203,17 +239,19 @@ export default function Dashboard() {
                     type="file"
                     id="csvFile"
                     accept={
-                      subscriptionType === "premium"
+                      subscriptionType === "Premium" ||
+                      subscriptionType === "VIP"
                         ? ".csv,.mp4,.avi,.mov"
                         : ".csv"
                     }
                     onChange={handleFileChange}
                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                   />
-                  {subscriptionType === "BASIC" && (
+                  {subscriptionType === "Basic" && (
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                      Upgrade to premium for video grading. Remaining requests:{" "}
-                      {remainingRequests}/{requestLimit}
+                      Upgrade to Premium for audio grading or VIP for video
+                      grading. Remaining requests: {remainingRequests}/
+                      {requestLimit}
                     </p>
                   )}
                 </div>
@@ -535,7 +573,8 @@ export default function Dashboard() {
             Need Help?
           </h2>
           <p className="mb-6 text-gray-600 dark:text-gray-300">
-            Check out our frequently asked questions for more information.
+            Check out our frequently asked questions for more information or
+            contact us directly.
           </p>
           <div className="space-x-4">
             <a
@@ -549,6 +588,12 @@ export default function Dashboard() {
               className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-300 ease-in-out"
             >
               Submit Feedback
+            </Link>
+            <Link
+              href="/contact"
+              className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-300 ease-in-out"
+            >
+              Contact Us
             </Link>
           </div>
         </div>

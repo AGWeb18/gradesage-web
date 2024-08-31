@@ -1,9 +1,12 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const plans = [
   {
-    name: "Regular",
+    name: "Basic",
     price: "$15/month",
     description: "Perfect for basic grading needs.",
     features: ["Text Grading", "Up to 300 submissions/month", "Email support"],
@@ -37,19 +40,37 @@ const plans = [
   },
 ];
 
-export default function PricingSection() {
+interface PricingSectionProps {
+  showCurrentPlan?: boolean;
+}
+
+export default function PricingSection({
+  showCurrentPlan = false,
+}: PricingSectionProps) {
+  const { data: session } = useSession();
+  const userPlan = session?.user?.subscriptionType || "Free";
+
   return (
     <section className="py-12 sm:py-20 bg-gray-50 dark:bg-gray-800">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl sm:text-3xl font-semibold text-center mb-8 sm:mb-12 text-gray-800 dark:text-white">
-          Pricing
+          {showCurrentPlan ? "Choose Your Plan" : "Pricing"}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <div
               key={index}
-              className="bg-white dark:bg-gray-700 p-6 sm:p-8 rounded-lg shadow-md flex flex-col"
+              className={`bg-white dark:bg-gray-700 p-6 sm:p-8 rounded-lg shadow-md flex flex-col ${
+                plan.name === userPlan && showCurrentPlan
+                  ? "border-4 border-blue-500 dark:border-blue-400"
+                  : ""
+              }`}
             >
+              {plan.name === userPlan && showCurrentPlan && (
+                <div className="bg-blue-500 text-white text-center py-1 px-4 rounded-full text-sm font-semibold mb-4">
+                  Current Plan
+                </div>
+              )}
               <h3 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
                 {plan.name}
               </h3>
@@ -85,9 +106,20 @@ export default function PricingSection() {
               </ul>
               <Link
                 href={plan.link}
-                className="mt-auto bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300 text-center dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                className={`mt-auto bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300 text-center dark:bg-indigo-500 dark:hover:bg-indigo-600 ${
+                  plan.name === userPlan && showCurrentPlan
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+                onClick={(e) => {
+                  if (plan.name === userPlan && showCurrentPlan) {
+                    e.preventDefault();
+                  }
+                }}
               >
-                Get Started
+                {plan.name === userPlan && showCurrentPlan
+                  ? "Current Plan"
+                  : "Get Started"}
               </Link>
             </div>
           ))}
@@ -95,6 +127,21 @@ export default function PricingSection() {
         <p className="text-center mt-8 text-gray-600 dark:text-gray-300 font-semibold">
           Cancel Anytime
         </p>
+        <div className="text-center mt-8">
+          <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">
+            Need more submissions?
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300">
+            Contact us for custom bulk pricing options for educational
+            institutions.
+          </p>
+          <Link
+            href="/contact"
+            className="mt-4 inline-block bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300"
+          >
+            Get in touch
+          </Link>
+        </div>
       </div>
     </section>
   );

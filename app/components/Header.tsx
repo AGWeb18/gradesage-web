@@ -17,8 +17,8 @@ export default function Header() {
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-md">
-      <nav className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
           <Link
             href="/"
             className="text-2xl font-bold text-primary-light dark:text-primary-dark"
@@ -33,6 +33,13 @@ export default function Header() {
             >
               FAQ
             </Link>
+            <Link
+              href="/contact"
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+            >
+              Contact
+            </Link>
+
             {session ? (
               <div className="flex items-center space-x-4">
                 <Link
@@ -113,7 +120,7 @@ export default function Header() {
             )}
           </div>
         )}
-      </nav>
+      </div>
     </header>
   );
 }

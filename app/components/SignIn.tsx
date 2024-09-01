@@ -3,6 +3,9 @@
 import { signIn } from "next-auth/react";
 
 export default function SignIn() {
+  const callbackUrl = process.env.NEXT_PUBLIC_CALLBACK_URL || "/dashboard";
+  console.log("Callback URL:", callbackUrl); // Debugging line
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
@@ -10,7 +13,7 @@ export default function SignIn() {
           Sign in to GradeSage AI
         </h1>
         <button
-          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          onClick={() => signIn("google", { callbackUrl })}
           className="w-full flex items-center justify-center px-4 py-2 space-x-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           <svg

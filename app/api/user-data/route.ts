@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/auth-options';
-import { redis } from '../../../lib/redis';
+import { kv } from '../../../lib/kv';
 import { Session } from 'next-auth';
 
 export async function GET(req: NextRequest) {
@@ -19,34 +19,31 @@ export async function GET(req: NextRequest) {
     const subscriptionStartKey = `user:${userId}:subscription_start`;
 
     const [subscriptionType, requestCount, subscriptionStart] = await Promise.all([
-      redis.get(`user:${userId}:subscription`),
-      redis.get(key),
-      redis.get(subscriptionStartKey),
+      kv.get(`user:${userId}:subscription`),
+      kv.get(key),
+      kv.get(subscriptionStartKey),
     ]);
 
-    let parsedRequestCount = parseInt(requestCount ?? '0');
+    let parsedRequestCount = parseInt(requestCount?.toString() ?? '0');
     let daysLeft = 30;
 
-    // Check if we need to reset the count
     if (subscriptionStart) {
-      const daysSinceSubscriptionStart = Math.floor((Date.now() - parseInt(subscriptionStart)) / (1000 * 60 * 60 * 24));
+      const daysSinceSubscriptionStart = Math.floor((Date.now() - parseInt(subscriptionStart.toString())) / (1000 * 60 * 60 * 24));
       daysLeft = Math.max(0, 30 - daysSinceSubscriptionStart);
       if (daysSinceSubscriptionStart >= 30) {
-        // Reset the count and update the subscription start date
-        await redis.set(key, '0');
-        await redis.set(subscriptionStartKey, Date.now().toString());
+        await kv.set(key, '0');
+        await kv.set(subscriptionStartKey, Date.now().toString());
         parsedRequestCount = 0;
         daysLeft = 30;
         console.log(`Reset Anthropic request count for user ${userId}`);
       }
     } else {
-      // If no start date is set, set it to now
-      await redis.set(subscriptionStartKey, Date.now().toString());
+      await kv.set(subscriptionStartKey, Date.now().toString());
     }
 
-    console.log('Redis data:', { subscriptionType, requestCount: parsedRequestCount });
+    console.log('KV data:', { subscriptionType, requestCount: parsedRequestCount });
 
-    let limit = 10; // Default to Free plan
+    let limit = 10;
     if (subscriptionType === 'Basic') limit = 300;
     if (subscriptionType === 'Premium') limit = 1000;
     if (subscriptionType === 'VIP') limit = Infinity;

@@ -59,6 +59,7 @@ export default function Dashboard() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [daysLeft, setDaysLeft] = useState<number | null>(null);
   const [upgradeInfo, setUpgradeInfo] = useState<string | null>(null);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const fetchUserData = async () => {
     try {
@@ -74,6 +75,10 @@ export default function Dashboard() {
       setRequestLimit(data.limit);
       setDaysLeft(data.daysLeft);
       setUpgradeInfo(data.upgradeInfo);
+
+      if (data.requestCount >= data.limit) {
+        setIsDisabled(true);
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -176,22 +181,46 @@ export default function Dashboard() {
               <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
                 Subscription Info
               </h2>
-              <p className="text-gray-800 dark:text-gray-300">
-                Plan: {subscriptionType}
-              </p>
-              <p className="text-gray-800 dark:text-gray-300">
-                Requests this month: {requestCount}
-              </p>
-              <p className="text-gray-800 dark:text-gray-300">
-                Remaining requests: {remainingRequests}
-              </p>
-              <p className="text-gray-800 dark:text-gray-300">
-                Request limit:{" "}
-                {requestLimit === Infinity ? "Unlimited" : requestLimit}
-              </p>
-              <p className="text-gray-800 dark:text-gray-300">
-                Days left in current cycle: {daysLeft}
-              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow">
+                  <p className="text-gray-800 dark:text-gray-300">Plan</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {subscriptionType}
+                  </p>
+                </div>
+                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow">
+                  <p className="text-gray-800 dark:text-gray-300">
+                    Requests this month
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {requestCount}
+                  </p>
+                </div>
+                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow">
+                  <p className="text-gray-800 dark:text-gray-300">
+                    Remaining requests
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {remainingRequests}
+                  </p>
+                </div>
+                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow">
+                  <p className="text-gray-800 dark:text-gray-300">
+                    Request limit
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {requestLimit === Infinity ? "Unlimited" : requestLimit}
+                  </p>
+                </div>
+                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow">
+                  <p className="text-gray-800 dark:text-gray-300">
+                    Days left in current cycle
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {daysLeft}
+                  </p>
+                </div>
+              </div>
               {upgradeInfo && (
                 <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-md">
                   <p className="font-semibold">Upgrade your plan!</p>
@@ -246,6 +275,7 @@ export default function Dashboard() {
                     }
                     onChange={handleFileChange}
                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    disabled={isDisabled}
                   />
                   {subscriptionType === "Basic" && (
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -396,7 +426,7 @@ export default function Dashboard() {
                 </div>
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || isDisabled}
                   className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out disabled:opacity-50"
                 >
                   {isLoading ? "Processing..." : "Process CSV"}
@@ -576,7 +606,7 @@ export default function Dashboard() {
             Check out our frequently asked questions for more information or
             contact us directly.
           </p>
-          <div className="space-x-4">
+          <div className="space-y-4 sm:space-y-0 sm:space-x-4 flex flex-col sm:flex-row justify-center">
             <a
               href="/faq"
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-300 ease-in-out"

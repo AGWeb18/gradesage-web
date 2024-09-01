@@ -49,6 +49,7 @@ export default function PricingSection({
 }: PricingSectionProps) {
   const { data: session } = useSession();
   const userPlan = (session?.user as any)?.subscriptionType || "Free";
+  console.log("User plan in PricingSection:", userPlan); // Debugging line
 
   return (
     <section className="py-12 sm:py-20 bg-gray-50 dark:bg-gray-800">
@@ -61,16 +62,18 @@ export default function PricingSection({
             <div
               key={index}
               className={`bg-white dark:bg-gray-700 p-6 sm:p-8 rounded-lg shadow-md flex flex-col ${
-                plan.name === userPlan && showCurrentPlan
+                plan.name === userPlan && showCurrentPlan && userPlan !== "Free"
                   ? "border-4 border-blue-500 dark:border-blue-400"
                   : ""
               }`}
             >
-              {plan.name === userPlan && showCurrentPlan && (
-                <div className="bg-blue-500 text-white text-center py-1 px-4 rounded-full text-sm font-semibold mb-4">
-                  Current Plan
-                </div>
-              )}
+              {plan.name === userPlan &&
+                showCurrentPlan &&
+                userPlan !== "Free" && (
+                  <div className="bg-blue-500 text-white text-center py-1 px-4 rounded-full text-sm font-semibold mb-4">
+                    Current Plan
+                  </div>
+                )}
               <h3 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
                 {plan.name}
               </h3>
@@ -107,17 +110,25 @@ export default function PricingSection({
               <Link
                 href={plan.link}
                 className={`mt-auto bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300 text-center dark:bg-indigo-500 dark:hover:bg-indigo-600 ${
-                  plan.name === userPlan && showCurrentPlan
+                  plan.name === userPlan &&
+                  showCurrentPlan &&
+                  userPlan !== "Free"
                     ? "opacity-50 cursor-not-allowed"
                     : ""
                 }`}
                 onClick={(e) => {
-                  if (plan.name === userPlan && showCurrentPlan) {
+                  if (
+                    plan.name === userPlan &&
+                    showCurrentPlan &&
+                    userPlan !== "Free"
+                  ) {
                     e.preventDefault();
                   }
                 }}
               >
-                {plan.name === userPlan && showCurrentPlan
+                {plan.name === userPlan &&
+                showCurrentPlan &&
+                userPlan !== "Free"
                   ? "Current Plan"
                   : "Get Started"}
               </Link>

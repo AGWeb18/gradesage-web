@@ -15,6 +15,7 @@ export default function UpgradePage() {
     if (status !== "loading") {
       setIsLoading(false);
     }
+    console.log("Session data in UpgradePage:", session); // Debugging line
   }, [status]);
 
   if (isLoading) {

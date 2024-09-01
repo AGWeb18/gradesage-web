@@ -58,7 +58,7 @@ export default function SignInPage() {
               View our pricing plans →
             </Link>
           </div>
-          <div className="w-full md:w-1/2 max-w-md">
+          <div className="w-full md:w-1/2 max-w-md bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md p-6">
             <SignIn />
           </div>
         </div>

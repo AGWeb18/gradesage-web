@@ -2,15 +2,15 @@ import React from "react";
 
 const features = [
   {
-    title: "Lightning-Fast Grading",
+    title: "Lightning-Fast Screening",
     description:
-      "Grade hundreds of assignments in minutes, not hours. Save valuable time for more impactful teaching.",
+      "Screen hundreds of assignments in minutes, not hours. Save valuable time for more impactful teaching.",
     icon: "⚡",
   },
   {
     title: "Unbiased Evaluation",
     description:
-      "Ensure fair and consistent grading across all students, eliminating human fatigue and subjectivity.",
+      "Ensure fair and consistent screening across all students, eliminating human fatigue and subjectivity.",
     icon: "⚖️",
   },
   {
@@ -22,7 +22,7 @@ const features = [
   {
     title: "Multi-Format Support",
     description:
-      "Grade text, audio, and video submissions with equal ease and accuracy.",
+      "Screen text, audio, and video submissions with equal ease and accuracy.",
     icon: "🎥",
   },
   {
@@ -34,7 +34,7 @@ const features = [
   {
     title: "Continuous Learning",
     description:
-      "Our AI evolves with each use, constantly improving its grading accuracy and feedback quality.",
+      "Our AI evolves with each use, constantly improving its screening accuracy and feedback quality.",
     icon: "🧠",
   },
 ];
@@ -44,7 +44,7 @@ export default function Features() {
     <section className="py-12 sm:py-20 bg-gray-50 dark:bg-gray-800">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl sm:text-3xl font-semibold text-center mb-8 sm:mb-12 text-text-light dark:text-text-dark">
-          Revolutionize Your Grading Process
+          Revolutionize Your Screening Process
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {features.map((feature, index) => (

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/auth-options';
-import { redis } from '@/lib/redis';
+import { kv } from '@/lib/kv';
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,15 +20,14 @@ export async function POST(req: NextRequest) {
     const userId = session.user.email;
     const feedbackKey = `user:${userId}:feedback:${Date.now()}`;
 
-    await redis.hmset(feedbackKey, {
+    await kv.hmset(feedbackKey, {
       name,
       email,
       feedback,
       timestamp: Date.now().toString(),
     });
 
-    // Set an expiration for the feedback data (e.g., 30 days)
-    await redis.expire(feedbackKey, 30 * 24 * 60 * 60);
+    await kv.expire(feedbackKey, 30 * 24 * 60 * 60);
 
     return NextResponse.json({ message: 'Feedback submitted successfully' }, { status: 200 });
   } catch (error) {

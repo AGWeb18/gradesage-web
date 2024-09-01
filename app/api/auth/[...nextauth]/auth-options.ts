@@ -1,9 +1,8 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { User } from "next-auth";
-import { Profile } from "next-auth";
 import { Session } from "next-auth";
-import { redis } from '@/lib/redis';
+import { kv } from '@/lib/kv';
 
 interface CustomUser extends User {
   googleId?: string;
@@ -36,26 +35,22 @@ export const authOptions: NextAuthOptions = {
         customUser.profileImage = (profile as { picture?: string })?.picture;
         
         try {
-          // Check if user exists in Redis
           const userKey = `user:${user.email}`;
-          const existingUser = await redis.hgetall(userKey);
+          const existingUser = await kv.hgetall(userKey);
           
-          if (!existingUser.email) {
-            // New user, set default subscription type
-            await redis.hmset(userKey, {
+          if (!existingUser || !existingUser.email) {
+            await kv.hmset(userKey, {
               email: user.email,
               name: user.name || '',
               subscriptionType: "Free",
               createdAt: Date.now().toString(),
             });
-            console.log(`New user created in Redis: ${user.email}`);
+            console.log(`New user created in KV: ${user.email}`);
           } else {
             console.log(`Existing user signed in: ${user.email}`);
           }
         } catch (error) {
-          console.error('Error during Redis operation in signIn:', error);
-          // Consider whether to fail open or closed based on your security requirements
-          // For now, we'll allow the sign-in to proceed even if Redis operations fail
+          console.error('Error during KV operation in signIn:', error);
         }
       }
       return true;
@@ -65,11 +60,11 @@ export const authOptions: NextAuthOptions = {
       if (customSession.user && customSession.user.email) {
         try {
           const userKey = `user:${customSession.user.email}`;
-          const subscriptionType = await redis.hget(userKey, 'subscriptionType');
+          const subscriptionType = await kv.hget(userKey, 'subscriptionType') as string;
           customSession.user.subscriptionType = subscriptionType || "Free";
         } catch (error) {
-          console.error('Error fetching user subscription type from Redis:', error);
-          customSession.user.subscriptionType = "Free"; // Default to Free if there's an error
+          console.error('Error fetching user subscription type from KV:', error);
+          customSession.user.subscriptionType = "Free";
         }
       }
       return customSession;

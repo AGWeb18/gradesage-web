@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { redis } from '../../lib/redis';
+import { kv } from '../../lib/kv';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../api/auth/[...nextauth]/auth-options';
 
@@ -22,18 +22,22 @@ export async function rateLimiter(req: NextRequest) {
   const key = `user:${userId}:anthropic_requests`;
 
   const [subscriptionType, requestCount] = await Promise.all([
-    redis.get(`user:${userId}:subscription`),
-    redis.get(key),
+    kv.get(`user:${userId}:subscription`),
+    kv.get(key),
   ]);
 
   console.log(`Rate limiter called for user ${userId}. Current Anthropic request count:`, requestCount);
 
   const limit = RATE_LIMITS[subscriptionType as keyof typeof RATE_LIMITS] || RATE_LIMITS.Basic;
 
-  if (parseInt(requestCount ?? '0') >= limit) {
+  if (parseInt(requestCount as string ?? '0') >= limit) {
     console.log(`Rate limit exceeded for user ${userId}`);
     return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
   }
 
-  return null;
+  return NextResponse.next();
 }
+
+export const config = {
+  matcher: '/api/process-csv',
+};

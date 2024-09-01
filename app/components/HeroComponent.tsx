@@ -8,7 +8,7 @@ export default function HeroComponent() {
         GradeSage AI
       </h1>
       <h2 className="text-xl sm:text-2xl text-text-light dark:text-text-dark mb-2">
-        Smart grading for all platforms.
+        Smart screening for all platforms.
       </h2>
       <h2 className="text-xl sm:text-2xl text-text-light dark:text-text-dark mb-8">
         Desire2Learn and beyond.
@@ -19,7 +19,7 @@ export default function HeroComponent() {
             href="/dashboard"
             className="inline-block bg-primary-light dark:bg-primary-dark text-white py-3 px-8 rounded-full font-semibold hover:bg-opacity-90 transition duration-300 shadow-lg hover:shadow-xl"
           >
-            Start Grading Smarter
+            Start Screening Smarter
           </Link>
         </div>
         <p className="text-sm text-text-light dark:text-text-dark">

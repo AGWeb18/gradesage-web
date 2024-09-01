@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/auth-options';
 import { parse } from 'csv-parse/sync';
 import Anthropic from '@anthropic-ai/sdk';
-import { redis } from '@/lib/redis';
+import { kv } from '@/lib/kv';
 import { rateLimiter } from '@/app/middleware/rateLimiter';
 
 const anthropic = new Anthropic({
@@ -42,25 +42,24 @@ export async function POST(req: NextRequest) {
     const key = `user:${userId}:anthropic_requests`;
 
     const [subscriptionType, requestCount] = await Promise.all([
-      redis.get(`user:${userId}:subscription`),
-      redis.incr(key),
+      kv.get(`user:${userId}:subscription`),
+      kv.get(key), // Change this line to get the current count without incrementing
     ]);
 
     console.log(`User ${userId} request count updated:`, requestCount);
 
-    let limit = 10; // Default to Free plan
+    let limit = 10;
     if (subscriptionType === 'Basic') limit = 300;
     if (subscriptionType === 'Premium') limit = 1000;
     if (subscriptionType === 'VIP') limit = Infinity;
 
-    if (requestCount > limit) {
+    if (typeof requestCount === 'number' && requestCount > limit) {
       console.log(`Rate limit exceeded for user ${userId}`);
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
-    // Set expiry for the key if it's a new key
     if (requestCount === 1) {
-      await redis.expire(key, 30 * 24 * 60 * 60); // 30 days
+      await kv.expire(key, 30 * 24 * 60 * 60);
       console.log(`Set expiry for new key: ${key}`);
     }
 
@@ -72,7 +71,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    // Process the file (CSV only)
     let gradedResponses;
     if (file.type === 'text/csv') {
       gradedResponses = await processCSV(file, formData, userId);
@@ -116,8 +114,18 @@ async function processCSV(file: File, formData: FormData, userId: string): Promi
   const gradedResponses: GradedResponse[] = [];
   let anthropicRequestCount = 0;
 
+  const key = `user:${userId}:anthropic_requests`;
+  const subscriptionType = await kv.get(`user:${userId}:subscription`) as string;
+  const limit = getRateLimit(subscriptionType);
+
   for (const record of records) {
     if (record[questionTypeCol] === 'WR') {
+      const currentCount = await kv.get(key) as number;
+      if (currentCount >= limit) {
+        console.log(`Rate limit exceeded for user ${userId} during processing`);
+        break;
+      }
+
       const response = await getTeachingAssistantScore(record[questionCol], record[answerCol]);
       const [aiScore, aiComment] = extractScoreAndComment(response);
       gradedResponses.push({
@@ -129,49 +137,56 @@ async function processCSV(file: File, formData: FormData, userId: string): Promi
         aiComment
       });
       anthropicRequestCount++;
+      await kv.incr(key); // Increment the count here
     }
   }
 
-  // Update the user's request count after processing all records
-  await updateUserRequestCount(userId, anthropicRequestCount);
+  await updateUserRequestCount(userId, anthropicRequestCount); // Update the total count after processing all records
 
   return gradedResponses;
+}
+
+function getRateLimit(subscriptionType: string): number {
+  switch (subscriptionType) {
+    case 'Basic':
+      return 300;
+    case 'Premium':
+      return 1000;
+    case 'VIP':
+      return Infinity;
+    default:
+      return 10;
+  }
 }
 
 async function updateUserRequestCount(userId: string, increment: number) {
   const key = `user:${userId}:anthropic_requests`;
   const subscriptionStartKey = `user:${userId}:subscription_start`;
 
-  // Get the subscription start date
-  let subscriptionStart = await redis.get(subscriptionStartKey);
+  let subscriptionStart = await kv.get(subscriptionStartKey);
 
   if (!subscriptionStart) {
-    // If no start date is set, set it to now
     subscriptionStart = Date.now().toString();
-    await redis.set(subscriptionStartKey, subscriptionStart);
+    await kv.set(subscriptionStartKey, subscriptionStart);
   }
 
-  const daysSinceSubscriptionStart = Math.floor((Date.now() - parseInt(subscriptionStart)) / (1000 * 60 * 60 * 24));
+  const daysSinceSubscriptionStart = Math.floor((Date.now() - Number(subscriptionStart)) / (1000 * 60 * 60 * 24));
 
   if (daysSinceSubscriptionStart >= 30) {
-    // Reset the count and update the subscription start date
-    await redis.set(key, increment.toString());
-    await redis.set(subscriptionStartKey, Date.now().toString());
+    await kv.set(key, increment.toString());
+    await kv.set(subscriptionStartKey, Date.now().toString());
     console.log(`Reset Anthropic request count for user ${userId}`);
   } else {
-    // Increment the existing count
-    await redis.incrby(key, increment);
+    await kv.incrby(key, increment);
   }
 
-  const newCount = await redis.get(key);
+  const newCount = await kv.get(key);
   console.log(`Updated Anthropic request count for user ${userId}: ${newCount}`);
   
-  // Set expiry for the key (30 days)
-  await redis.expire(key, 30 * 24 * 60 * 60);
+  await kv.expire(key, 30 * 24 * 60 * 60);
 }
 
 async function processVideo(file: File): Promise<GradedResponse[]> {
-  // Implement video processing logic here
   throw new Error('Video processing not implemented');
 }
 

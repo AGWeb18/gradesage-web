@@ -25,27 +25,7 @@ export default function ContactPage() {
                 Email
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                contact@gradesage.ai
-              </p>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2 text-text-light dark:text-text-dark">
-                Phone
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                +1 (555) 123-4567
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-2 text-text-light dark:text-text-dark">
-                Address
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                123 AI Street, Suite 456
-                <br />
-                Silicon Valley, CA 94000
-                <br />
-                United States
+                gradesageai@gmail.com
               </p>
             </div>
           </div>

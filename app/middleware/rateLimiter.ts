@@ -15,7 +15,7 @@ export async function rateLimiter(req: NextRequest) {
 
   if (!session || !session.user) {
     console.log('No session or user found in rateLimiter');
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return { error: 'Unauthorized', status: 401 };
   }
 
   const userId = session.user.email;
@@ -32,10 +32,10 @@ export async function rateLimiter(req: NextRequest) {
 
   if (parseInt(requestCount as string ?? '0') >= limit) {
     console.log(`Rate limit exceeded for user ${userId}`);
-    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+    return { error: 'Rate limit exceeded', status: 429 };
   }
 
-  return NextResponse.next();
+  return null; // No rate limit exceeded
 }
 
 export const config = {

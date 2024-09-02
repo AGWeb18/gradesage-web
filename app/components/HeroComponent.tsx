@@ -19,7 +19,7 @@ export default function HeroComponent() {
             href="/dashboard"
             className="inline-block bg-primary-light dark:bg-primary-dark text-white py-3 px-8 rounded-full font-semibold hover:bg-opacity-90 transition duration-300 shadow-lg hover:shadow-xl"
           >
-            Start Screening Smarter
+            Start Grading Smarter
           </Link>
         </div>
         <p className="text-sm text-text-light dark:text-text-dark">

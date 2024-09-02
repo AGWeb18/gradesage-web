@@ -5,27 +5,42 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export default function ThankYouPage() {
   const router = useRouter();
+  const { data: session, update } = useSession();
   const [isMounted, setIsMounted] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [subscriptionType, setSubscriptionType] = useState<string | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    if (isMounted) {
-      // Add logic to verify payment confirmation here
-      // If payment is not confirmed, redirect to another page
-      const paymentConfirmed = true; // Replace with actual payment confirmation logic
-      if (!paymentConfirmed) {
-        router.push("/");
-      }
+    if (isMounted && session) {
+      const fetchUserData = async () => {
+        try {
+          await update(); // Force update of the session
+          const response = await fetch("/api/user-data");
+          const data = await response.json();
+          if (data.subscriptionType && data.subscriptionType !== "Free") {
+            setPaymentConfirmed(true);
+            setSubscriptionType(data.subscriptionType);
+          } else {
+            router.push("/");
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          router.push("/");
+        }
+      };
+      fetchUserData();
     }
-  }, [isMounted, router]);
+  }, [isMounted, session, router, update]);
 
-  if (!isMounted) {
+  if (!isMounted || !paymentConfirmed) {
     return null; // or a loading spinner
   }
 
@@ -38,7 +53,8 @@ export default function ThankYouPage() {
             Thank You for Your Purchase!
           </h1>
           <p className="mb-6 text-lg text-gray-600 dark:text-gray-300">
-            Your transaction has been completed successfully.
+            Your {subscriptionType} subscription has been activated
+            successfully.
           </p>
           <p className="mb-8 text-gray-600 dark:text-gray-300">
             You will receive an email confirmation shortly.

@@ -20,9 +20,9 @@ interface GradedResponse {
 }
 
 export async function POST(req: NextRequest) {
-  const rateLimitResponse = await rateLimiter(req);
-  if (rateLimitResponse) {
-    return rateLimitResponse;
+  const rateLimitResult = await rateLimiter(req);
+  if (rateLimitResult) {
+    return NextResponse.json({ error: rateLimitResult.error }, { status: rateLimitResult.status });
   }
 
   try {
@@ -137,11 +137,11 @@ async function processCSV(file: File, formData: FormData, userId: string): Promi
         aiComment
       });
       anthropicRequestCount++;
-      await kv.incr(key); // Increment the count here
     }
   }
 
-  await updateUserRequestCount(userId, anthropicRequestCount); // Update the total count after processing all records
+  // Update the count only once after processing all records
+  await updateUserRequestCount(userId, anthropicRequestCount);
 
   return gradedResponses;
 }
@@ -193,7 +193,7 @@ async function processVideo(file: File): Promise<GradedResponse[]> {
 async function getTeachingAssistantScore(question: string, answer: string): Promise<string> {
   try {
     const message = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20240620",
+      model: "claude-3-opus-20240229",
       max_tokens: 618,
       temperature: 0,
       system: `You are a Teaching Assistant at a university level, responsible for evaluating student responses across various courses. Your task is to read the provided question and student answer, then assess the response quality on a scale of 0 to 5.
@@ -224,13 +224,19 @@ async function getTeachingAssistantScore(question: string, answer: string): Prom
       ]
     });
 
-    const content = message.content[0];
-    if (content.type === 'text') {
-      return content.text;
+    if (message.content && message.content.length > 0) {
+      const content = message.content[0];
+      if (typeof content === 'object' && 'text' in content) {
+        return content.text;
+      }
     }
     throw new Error('Unexpected response format');
   } catch (error) {
     console.error('Error in API call:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     return "0|Error in API call";
   }
 }

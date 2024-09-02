@@ -8,7 +8,7 @@ import HeroComponent from "./components/HeroComponent";
 
 const currentPromotion = {
   active: true,
-  message: "Back to School Sale: 10% off all plans! Use code BACK2SCHOOL",
+  message: "Back to School Sale: 20% off all plans! Use code BACK2SCHOOL",
   endDate: "2023-10-30",
 };
 

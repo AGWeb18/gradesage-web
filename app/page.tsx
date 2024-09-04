@@ -1,4 +1,8 @@
+"use client";
+
 import React from "react";
+import Link from "next/link";
+import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ExampleCard from "./components/ExampleCard";
@@ -9,10 +13,11 @@ import HeroComponent from "./components/HeroComponent";
 const currentPromotion = {
   active: true,
   message: "Back to School Sale: 20% off all plans! Use code BACK2SCHOOL",
-  endDate: "2023-10-30",
+  endDate: "2024-10-30",
 };
 
 export default function Home() {
+  const { event } = useGoogleAnalytics();
   const examples = [
     {
       title: "Short Answer: Biology",
@@ -43,6 +48,13 @@ export default function Home() {
     },
   ];
 
+  const handleCTAClick = () => {
+    event("cta_click", {
+      event_category: "engagement",
+      event_label: "Try GradeSage AI Free",
+    });
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">
       {currentPromotion.active && (
@@ -63,9 +75,14 @@ export default function Home() {
         <HeroComponent />
 
         <section className="mb-12">
-          <h2 className="text-3xl font-semibold text-text-light dark:text-text-dark mb-6">
-            GradeSage AI in Action
+          <h2 className="text-3xl font-semibold text-text-light dark:text-text-dark mb-4">
+            See GradeSage AI in Action
           </h2>
+          <p className="mb-6 text-gray-600 dark:text-gray-300">
+            Experience how GradeSage AI can transform your grading process. Our
+            AI assistant provides quick, consistent, and insightful evaluations
+            for various types of assignments.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {examples.map((example, index) => (
               <ExampleCard key={index} {...example} />

@@ -6,6 +6,13 @@ import { useSession } from "next-auth/react";
 
 const plans = [
   {
+    name: "Free",
+    price: "$0/month",
+    description: "Try out our basic features.",
+    features: ["Text Grading", "Up to 10 submissions/month", "Email support"],
+    link: "/dashboard",
+  },
+  {
     name: "Basic",
     price: "$15/month",
     description: "Perfect for basic grading needs.",
@@ -57,23 +64,21 @@ export default function PricingSection({
         <h2 className="text-2xl sm:text-3xl font-semibold text-center mb-8 sm:mb-12 text-gray-800 dark:text-white">
           {showCurrentPlan ? "Choose Your Plan" : "Pricing"}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
           {plans.map((plan, index) => (
             <div
               key={index}
               className={`bg-white dark:bg-gray-700 p-6 sm:p-8 rounded-lg shadow-md flex flex-col ${
-                plan.name === userPlan && showCurrentPlan && userPlan !== "Free"
+                plan.name === userPlan && showCurrentPlan
                   ? "border-4 border-blue-500 dark:border-blue-400"
                   : ""
               }`}
             >
-              {plan.name === userPlan &&
-                showCurrentPlan &&
-                userPlan !== "Free" && (
-                  <div className="bg-blue-500 text-white text-center py-1 px-4 rounded-full text-sm font-semibold mb-4">
-                    Current Plan
-                  </div>
-                )}
+              {plan.name === userPlan && showCurrentPlan && (
+                <div className="bg-blue-500 text-white text-center py-1 px-4 rounded-full text-sm font-semibold mb-4">
+                  Current Plan
+                </div>
+              )}
               <h3 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
                 {plan.name}
               </h3>
@@ -110,27 +115,21 @@ export default function PricingSection({
               <Link
                 href={plan.link}
                 className={`mt-auto bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300 text-center dark:bg-indigo-500 dark:hover:bg-indigo-600 ${
-                  plan.name === userPlan &&
-                  showCurrentPlan &&
-                  userPlan !== "Free"
+                  plan.name === userPlan && showCurrentPlan
                     ? "opacity-50 cursor-not-allowed"
                     : ""
                 }`}
                 onClick={(e) => {
-                  if (
-                    plan.name === userPlan &&
-                    showCurrentPlan &&
-                    userPlan !== "Free"
-                  ) {
+                  if (plan.name === userPlan && showCurrentPlan) {
                     e.preventDefault();
                   }
                 }}
               >
-                {plan.name === userPlan &&
-                showCurrentPlan &&
-                userPlan !== "Free"
+                {plan.name === userPlan && showCurrentPlan
                   ? "Current Plan"
-                  : "Get Started"}
+                  : plan.name === "Free"
+                  ? "Get Started"
+                  : "Upgrade"}
               </Link>
             </div>
           ))}

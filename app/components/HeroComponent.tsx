@@ -5,12 +5,12 @@ export default function HeroComponent() {
   return (
     <section className="text-center mb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
       <h1 className="text-5xl sm:text-5xl font-bold text-primary-light dark:text-primary-dark mb-4">
-        GradeSage AI: Your AI Grading Assistant
+        Your AI Grading Assistant
       </h1>
       <h2 className="text-2xl sm:text-3xl text-text-light dark:text-text-dark mb-6">
-        AI-Powered Grading Assistant: Save Hours on Assignment Evaluation
+        Save Hours on Assignment Evaluation
       </h2>
-      <ul className="text-left mb-8 space-y-2">
+      <ul className="text-center mb-8 space-y-2 flex flex-col items-center text-black dark:text-text-dark">
         <li className="flex items-center">
           <span className="mr-2">✅</span> Grade essays and long-form answers in
           minutes, not hours

@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ExampleCard from "./components/ExampleCard";
@@ -17,7 +16,6 @@ const currentPromotion = {
 };
 
 export default function Home() {
-  const { event } = useGoogleAnalytics();
   const examples = [
     {
       title: "Short Answer: Biology",
@@ -47,13 +45,6 @@ export default function Home() {
         "Good overview of SWOT elements. To improve, provide brief explanations for each point and consider adding one more item per category for a more comprehensive analysis.",
     },
   ];
-
-  const handleCTAClick = () => {
-    event("cta_click", {
-      event_category: "engagement",
-      event_label: "Try GradeSage AI Free",
-    });
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">

@@ -4,6 +4,9 @@ import { authOptions } from '../auth/[...nextauth]/auth-options';
 import { kv } from '../../../lib/kv';
 import { Session } from 'next-auth';
 
+// Add this line at the top of your file
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions) as Session & { user: { id: string, email: string } };

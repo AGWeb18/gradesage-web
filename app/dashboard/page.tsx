@@ -123,6 +123,12 @@ export default function Dashboard() {
       return;
     }
 
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      setError("File size exceeds the maximum limit of 10MB");
+      return;
+    }
+
     setIsProcessing(true);
     setIsLoading(true);
     setError(null);
@@ -143,7 +149,10 @@ export default function Dashboard() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to process CSV");
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || `HTTP error! status: ${response.status}`
+        );
       }
 
       const data = await response.json();
@@ -155,8 +164,12 @@ export default function Dashboard() {
       await fetchUserData();
       console.log("User data updated after CSV processing");
     } catch (err) {
-      setError("An error occurred while processing the file.");
-      console.error(err);
+      console.error("Error processing CSV:", err);
+      if (err instanceof Error) {
+        setError(`An error occurred while processing the file: ${err.message}`);
+      } else {
+        setError(`An error occurred while processing the file.`);
+      }
     } finally {
       setIsLoading(false);
       setIsProcessing(false);

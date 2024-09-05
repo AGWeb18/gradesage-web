@@ -49,6 +49,12 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
           </p>
         </div>
       </div>
+      {/* New teaser section */}
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+        <p className="text-sm font-semibold text-primary-600 dark:text-primary-400">
+          Coming soon: AI grading for oral presentations and video projects!
+        </p>
+      </div>
     </div>
   );
 };

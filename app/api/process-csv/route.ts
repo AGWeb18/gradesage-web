@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const [subscriptionType, requestCount] = await Promise.all([
       kv.get(`user:${userId}:subscription`),
-      kv.get(key), // Change this line to get the current count without incrementing
+      kv.get(key),
     ]);
 
     console.log(`User ${userId} request count updated:`, requestCount);
@@ -73,7 +73,17 @@ export async function POST(req: NextRequest) {
 
     let gradedResponses;
     if (file.type === 'text/csv') {
-      gradedResponses = await processCSV(file, formData, userId);
+      try {
+        gradedResponses = await processCSV(file, formData, userId);
+      } catch (error) {
+        console.error('Error processing CSV:', error);
+        console.error('Full error details:', JSON.stringify(error, null, 2)); // Log full error details
+        if (error instanceof Error) {
+          return NextResponse.json({ error: 'Error processing CSV', details: error.message }, { status: 500 });
+        } else {
+          return NextResponse.json({ error: 'Error processing CSV', details: 'Unknown error occurred' }, { status: 500 });
+        }
+      }
     } else {
       return NextResponse.json({ error: 'Unsupported file type' }, { status: 400 });
     }
@@ -88,6 +98,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error processing CSV:', error);
+    console.error('Full error details:', JSON.stringify(error, null, 2)); // Log full error details
     if (error instanceof Error) {
       return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 });
     } else {
@@ -97,12 +108,17 @@ export async function POST(req: NextRequest) {
 }
 
 async function processCSV(file: File, formData: FormData, userId: string): Promise<GradedResponse[]> {
+  console.log('Starting CSV processing...');
   try {
     const fileContents = await file.text();
+    console.log('File read successfully, parsing CSV...');
+    
     let records;
     try {
       records = parse(fileContents, { columns: true });
+      console.log('CSV parsed successfully, number of records:', records.length);
     } catch (error) {
+      console.error('Error parsing CSV:', error);
       throw new Error('Invalid CSV format');
     }
 

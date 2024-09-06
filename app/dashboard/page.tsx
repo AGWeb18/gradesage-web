@@ -116,6 +116,13 @@ export default function Dashboard() {
     }
   };
 
+  const handleMaxScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || /^\d+$/.test(value)) {
+      setMaxScore(value === "" ? 0 : parseInt(value, 10));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!file) {
@@ -316,10 +323,12 @@ export default function Dashboard() {
                       </button>
                       <input
                         id="maxScore"
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="\d*"
                         min="0"
                         value={maxScore}
-                        onChange={(e) => setMaxScore(Number(e.target.value))}
+                        onChange={handleMaxScoreChange}
                         className="w-full px-3 py-2 border-t border-b border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-center text-gray-900 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                       />
                       <button

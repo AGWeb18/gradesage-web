@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       worstQuestion 
     });
   } catch (error) {
-    console.error('Error processing file:', error);
+    console.error('Error processing CSV:', error);
     if (error instanceof Error) {
       return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 });
     } else {
@@ -97,53 +97,62 @@ export async function POST(req: NextRequest) {
 }
 
 async function processCSV(file: File, formData: FormData, userId: string): Promise<GradedResponse[]> {
-  const fileContents = await file.text();
-  let records;
   try {
-    records = parse(fileContents, { columns: true });
-  } catch (error) {
-    throw new Error('Invalid CSV format');
-  }
+    const fileContents = await file.text();
+    let records;
+    try {
+      records = parse(fileContents, { columns: true });
+    } catch (error) {
+      throw new Error('Invalid CSV format');
+    }
 
-  const usernameCol = formData.get('usernameCol') as string;
-  const questionTypeCol = formData.get('questionTypeCol') as string;
-  const questionCol = formData.get('questionCol') as string;
-  const answerCol = formData.get('answerCol') as string;
-  const mcScoreCol = formData.get('mcScoreCol') as string;
+    const usernameCol = formData.get('usernameCol') as string;
+    const questionTypeCol = formData.get('questionTypeCol') as string;
+    const questionCol = formData.get('questionCol') as string;
+    const answerCol = formData.get('answerCol') as string;
+    const mcScoreCol = formData.get('mcScoreCol') as string;
 
-  const gradedResponses: GradedResponse[] = [];
-  let anthropicRequestCount = 0;
+    const gradedResponses: GradedResponse[] = [];
+    let anthropicRequestCount = 0;
 
-  const key = `user:${userId}:anthropic_requests`;
-  const subscriptionType = await kv.get(`user:${userId}:subscription`) as string;
-  const limit = getRateLimit(subscriptionType);
+    const key = `user:${userId}:anthropic_requests`;
+    const subscriptionType = await kv.get(`user:${userId}:subscription`) as string;
+    const limit = getRateLimit(subscriptionType);
 
-  for (const record of records) {
-    if (record[questionTypeCol] === 'WR') {
-      const currentCount = await kv.get(key) as number;
-      if (currentCount >= limit) {
-        console.log(`Rate limit exceeded for user ${userId} during processing`);
-        break;
+    for (const record of records) {
+      if (record[questionTypeCol] === 'WR') {
+        const currentCount = await kv.get(key) as number;
+        if (currentCount >= limit) {
+          console.log(`Rate limit exceeded for user ${userId} during processing`);
+          break;
+        }
+
+        const response = await getTeachingAssistantScore(record[questionCol], record[answerCol]);
+        const [aiScore, aiComment] = extractScoreAndComment(response);
+        gradedResponses.push({
+          student: record[usernameCol],
+          mcScore: Number(record[mcScoreCol]) || 0,
+          question: record[questionCol],
+          answer: record[answerCol],
+          aiScore,
+          aiComment
+        });
+        anthropicRequestCount++;
       }
+    }
 
-      const response = await getTeachingAssistantScore(record[questionCol], record[answerCol]);
-      const [aiScore, aiComment] = extractScoreAndComment(response);
-      gradedResponses.push({
-        student: record[usernameCol],
-        mcScore: Number(record[mcScoreCol]) || 0,
-        question: record[questionCol],
-        answer: record[answerCol],
-        aiScore,
-        aiComment
-      });
-      anthropicRequestCount++;
+    // Update the count only once after processing all records
+    await updateUserRequestCount(userId, anthropicRequestCount);
+
+    return gradedResponses;
+  } catch (error) {
+    console.error('Error in processCSV:', error);
+    if (error instanceof Error) {
+      throw new Error(`Error processing CSV: ${error.message}`);
+    } else {
+      throw new Error('Unknown error occurred while processing CSV');
     }
   }
-
-  // Update the count only once after processing all records
-  await updateUserRequestCount(userId, anthropicRequestCount);
-
-  return gradedResponses;
 }
 
 function getRateLimit(subscriptionType: string): number {

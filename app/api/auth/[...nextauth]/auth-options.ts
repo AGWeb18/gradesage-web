@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { User } from "next-auth";
 import { Session } from "next-auth";
 import { kv } from '@/lib/kv';
+import nodemailer from 'nodemailer';
 
 interface CustomUser extends User {
   googleId?: string;
@@ -17,6 +18,34 @@ interface CustomSession extends Session {
     name?: string | null;
     email?: string | null;
     image?: string | null;
+  }
+}
+
+async function sendNewUserAlert(user: CustomUser) {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'riddinganthony@gmail.com',
+      pass: 'dlzb gyjx lvdv qnof',
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: 'aridding18@gmail.com',
+    subject: 'New User Signup - GradSage',
+    text: `A new user has signed up for GradSage:
+    
+    Name: ${user.name}
+    Email: ${user.email}
+    Signup Date: ${new Date().toLocaleString()}`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('New user alert email sent');
+  } catch (error) {
+    console.error('Error sending new user alert email:', error);
   }
 }
 
@@ -46,6 +75,9 @@ export const authOptions: NextAuthOptions = {
               createdAt: Date.now().toString(),
             });
             console.log(`New user created in KV: ${user.email}`);
+             // Send new user alert email
+            await sendNewUserAlert(user as CustomUser);
+
           } else {
             console.log(`Existing user signed in: ${user.email}`);
           }

@@ -6,6 +6,9 @@ import Anthropic from '@anthropic-ai/sdk';
 import { kv } from '@/lib/kv';
 import { rateLimiter } from '@/app/middleware/rateLimiter';
 
+export const maxDuration = 60; // This function can run for a maximum of 5 seconds
+export const dynamic = 'force-dynamic';
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!
 });
@@ -218,7 +221,7 @@ async function processVideo(file: File): Promise<GradedResponse[]> {
 async function getTeachingAssistantScore(question: string, answer: string): Promise<string> {
   try {
     const message = await anthropic.messages.create({
-      model: "claude-3-opus-20240229",
+      model:"claude-3-5-sonnet-20240620",
       max_tokens: 618,
       temperature: 0,
       system: `You are a Teaching Assistant at a university level, responsible for evaluating student responses across various courses. Your task is to read the provided question and student answer, then assess the response quality on a scale of 0 to 5.

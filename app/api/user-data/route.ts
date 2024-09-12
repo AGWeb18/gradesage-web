@@ -18,6 +18,13 @@ export async function GET(req: NextRequest) {
 
     const userId = session.user.email;
     console.log('Fetching data for user:', userId);
+    
+    // Check if the user is new
+    const userExists = await kv.get(`user:${userId}:subscription`);
+    if (!userExists) {
+      console.log(`New user signed in: ${userId}`);
+    }
+
     const key = `user:${userId}:anthropic_requests`;
     const subscriptionStartKey = `user:${userId}:subscription_start`;
 
